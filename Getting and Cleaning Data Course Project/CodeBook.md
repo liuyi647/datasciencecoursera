@@ -46,11 +46,14 @@ The encoding from activity labels ids to descriptive names.
 ## Data Variables
 The first 3 variables are
 |Variable Name|Variable Class|Description|Value Range|
+|-------------|:-------------:|:----------:|---------:|
 |personId|Integer|Id of person who takes part in the experiment|1:30|
 |activityId|Integer|Id of activities|1:6|
-|activityType|String|6 activities that persons have done in the experiment|WALKING,WALKING_UPSTAIRS,WALKING_DOWNSTAIRS,SITTING,STANDING,LAYING|
+|activityType|String|6 activities that persons have done in the experiment|See below|
 
-The following rest variables are the signals collected in the experiment.
+activityType = "WALKING", "WALKING_UPSTAIRS", "WALKING_DOWNSTAIRS", "SITTING", "STANDING,LAYING"
+
+The rest variables are the signals collected in the experiment.
 For the detail explanation, please read [variable info](https://github.com/liuyi647/datasciencecoursera/blob/master/Getting%20and%20Cleaning%20Data%20Course%20Project/features_info.txt)
 
 
