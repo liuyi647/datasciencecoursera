@@ -12,11 +12,15 @@ This data included both the raw sampled data (folder ../Inertial Signals) and fe
 There are 3 types of files:
 
 *x*: rows of feature measurements
+
 *y*: the activity labels corresponding to each row of X. Encoded as numbers.
+
 *subject*: the subjects on which each row of X was measured. Encoded as numbers.
+
 In addition, to determine which features are required, we look at the list of features:
 
 *features.txt*
+
 The encoding from activity labels ids to descriptive names.
 
 *activity_labels.txt*
@@ -47,7 +51,9 @@ The encoding from activity labels ids to descriptive names.
 The first 3 variables are
 
 personId - Id of person who takes part in the experiment. Integer, range is 1 to 30
+
 activityId - Id of activities, Integer, range is 1 to 6
+
 activityType - Activities that persons have done in the experiment, String, "WALKING", "WALKING_UPSTAIRS", "WALKING_DOWNSTAIRS", "SITTING", "STANDING,LAYING"
 
 The rest variables are the signals collected in the experiment.
