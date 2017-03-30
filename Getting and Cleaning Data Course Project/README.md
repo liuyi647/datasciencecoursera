@@ -7,7 +7,7 @@ The reposity contains the completed result of Getting and Cleaning Data Course P
 * ReadMe.md
 
 ## Instructions
-* Read [the project instructions] (https://www.coursera.org/learn/data-cleaning/peer/FIZtT/getting-and-cleaning-data-course-project)
+* Read [the project instructions](https://www.coursera.org/learn/data-cleaning/peer/FIZtT/getting-and-cleaning-data-course-project)
   *NOTE:* if you have not subscribed 'Data Science Specification', the link won't be available.
 * Download and unzip [the data](https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip) to your RStudio's working directory. 
 * Load run_analysis.R to your RStudio.
