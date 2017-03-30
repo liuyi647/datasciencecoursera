@@ -17,13 +17,9 @@ There are 3 types of files:
 
 *subject*: the subjects on which each row of X was measured. Encoded as numbers.
 
-In addition, to determine which features are required, we look at the list of features:
+*features.txt*: it determines which features are required.
 
-*features.txt*
-
-The encoding from activity labels ids to descriptive names.
-
-*activity_labels.txt*
+*activity_labels.txt*: the encoding from activity labels ids to descriptive names.
 
 ## Clean Data
 *tidyData.txt* contains the average of each variable for each activity and each person, ordered by *personId* and *activityId*
