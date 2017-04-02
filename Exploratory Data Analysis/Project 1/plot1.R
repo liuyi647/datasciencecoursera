@@ -9,6 +9,9 @@ plot1 <- function(){
                         "Global_intensity", "Sub_metering_1", 
                         "Sub_metering_2", "Sub_metering_3")
     
+    for (i in 3:9) {
+        myData[[i]] = as.numeric(as.character(myData[[i]]))}
+    
     dev.off(dev.list()["RStudioGD"])
     
     hist(myData$Global_active_power, 
