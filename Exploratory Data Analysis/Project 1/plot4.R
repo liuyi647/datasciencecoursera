@@ -13,6 +13,9 @@ plot4 <- function(){
             timestamp=strptime(paste(Date, Time), "%d/%m/%Y%H:%M:%S")
         })
     
+    for (i in 3:9) {
+        myData[[i]] = as.numeric(as.character(myData[[i]]))}
+    
     dev.off(dev.list()["RStudioGD"])
     
     par(mfrow = c(2, 2), mar = c(4, 4, 2, 2))

@@ -12,6 +12,9 @@ plot3 <- function(){
     myData <- within(myData, { 
             timestamp=strptime(paste(Date, Time), "%d/%m/%Y%H:%M:%S")
         })
+    
+    for (i in 3:9) {
+        myData[[i]] = as.numeric(as.character(myData[[i]]))}
 
     dev.off(dev.list()["RStudioGD"])
     
