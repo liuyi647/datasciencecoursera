@@ -1,5 +1,5 @@
-# Clean Data Set of Getting and Cleaning Data Course Project  
-The clean data set is the result of Getting and Cleaning Data Course Project. 
+# Code Book
+The code book describes the clean data set which is the result of Getting and Cleaning Data Course Project. 
 
 The project is to demonstrate your ability to collect, work with, and clean a data set. The goal is to prepare tidy data that can be used for later analysis.
 
