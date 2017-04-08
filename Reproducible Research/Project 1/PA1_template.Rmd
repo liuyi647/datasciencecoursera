@@ -1,0 +1,214 @@
+---
+title: "Activity Monitoring Data Exploratory Analyse Report"
+author: "liuyi647"
+date: April 06, 2017
+output: 
+    md_document:
+    variant: markdown_github
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache=TRUE)
+```
+
+## Abstract
+To understand the information or hidden information provided by 'Activity monitoring data', an exploratory analyse is completed. The following questions are answered.    
+
+* What is total number of steps taken per day? 
+* What is mean total number of steps taken per day?  
+* What is median total number of steps taken per day?
+* What is the average daily activity pattern?    
+* Do these missing values impact on the estimates of the total daily number of steps? What is the impact if they do?  
+* Are there differences in activity patterns between weekdays and weekends?  
+
+The analyse shall be reproducible according to the report.
+
+## Raw Data
+This section illustrates what the raw data is, how do obtain the raw data.
+The name of dataset is 'Activity monitoring data'. Its zip file size is 52k and available at [here](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip). There is a CSV file in the zip file.
+
+The variables included in this dataset are:
+
+**steps**: Number of steps taking in a 5-minute interval (missing values are coded as NA)  
+**date**: The date on which the measurement was taken in YYYY-MM-DD format  
+**interval**: Identifier for the 5-minute interval in which measurement was taken  
+
+## Data Process
+The following R code can download and unzip the zip file containing raw data, also show the first 6 rows and basic information of the raw data.
+
+```{r Activity monitoring data}
+url <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
+tempFileName <- "activity.csv"
+
+temp <- tempfile()
+download.file(url,temp)
+unzip(temp, tempFileName)
+activityData <- read.csv(tempFileName)
+unlink(temp)
+head(activityData)
+str(activityData)
+```
+
+The values of date column need to be converted into R date class.
+
+```{r}
+activityData$date <- as.Date(activityData$date, "%Y-%m-%d")
+str(activityData)
+```
+
+## Data Analyse
+This section describes the exploratory anaylse for activity data. The above questions are answered in the section one by one.
+
+### What is total number of steps taken per day? 
+In this process, missing values can be ignored. Therefore the subset without missing values is created
+
+The following R code generates the total number of steps taken per day.
+```{r}
+subNomissing <- subset(activityData, !is.na(activityData$steps), select=c("steps", "date", "interval"))
+aggregate(steps ~ date, subNomissing, sum, is.na(T))
+```
+
+
+The following shows histogram figure for total number of steps in one day.
+```{r, fig.width=10}
+library(ggplot2)
+sumNoMissing <- aggregate(steps ~ date, subNomissing, sum, is.na(T))
+ggplot(data=sumNoMissing, aes(sumNoMissing$steps)) +
+    geom_histogram(aes(y = ..count..), fill="blue", alpha = .3, binwidth = 500) +
+    scale_x_continuous(name = "Total number of Steps per day",
+                       breaks= seq(0,24000,1000)) +
+    scale_y_continuous(name = "Count") +
+    labs(title="Histogram for Total Number of Steps per Day") 
+```
+
+The summary of total number of steps taken per day.
+```{r}
+summary(sumNoMissing)
+```
+
+### What is mean total number of steps taken per day?  
+The following calculates the mean total number of steps taken per day.
+```{r}
+mean(sumNoMissing$steps)
+```
+
+### What is median total number of steps taken per day?
+The following calculates the median total number of steps taken per day.
+```{r}
+median(sumNoMissing$steps)
+```
+
+### What is the average daily activity pattern? 
+The following figure shows the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis). 
+
+```{r, fig.width=10}
+average <- aggregate(subNomissing, by=list(subNomissing$interval), mean, na.rm=T)
+ggplot(data=average, aes(average$steps)) +
+    geom_line(aes(x=average$interval, y = average$steps), col="blue")  +
+    scale_x_continuous(name = "minutes in one day",
+                        breaks= seq(0,2400,120)) +
+    scale_y_continuous(name = "Average steps") +
+    labs(title="Average steps during one day over Oct and Nov")
+
+```
+
+The maximum number of steps is 
+`r 
+rowIndex <- which.max(average$steps) 
+round(average[rowIndex, 2],2)
+`
+, 
+it occurs at the `r average[rowIndex, 3]` th minute of a day. Please see the following calculation.
+
+```{r}
+rowIndex <- which.max(average$steps)
+average[rowIndex, 2:3]
+```
+
+### Do these missing values impact on the estimates of the total daily number of steps? What is the impact if they do?  
+
+Note that there are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data. To answer the above question, the following operations are done.
+
+1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
+```{r}
+nrow(activityData[is.na(activityData$steps),])
+```
+2. Create a new dataset that is equal to the original dataset but with the missing data filled in. Fill the mean for that 5-minute interval in all of the missing values in the dataset. 
+```{r}
+completelyData <- activityData
+completelyData$steps[is.na(completelyData$steps)] <- as.integer(round(average$steps[match(completelyData$interval,average$interval)][which(is.na(completelyData$steps))],0))
+head(completelyData)
+str(completelyData)
+```
+
+4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. 
+```{r, fig.width=10}
+sumImput <- aggregate(steps ~ date, completelyData, sum)
+ggplot(data=sumImput, aes(sumImput$steps)) +
+    geom_histogram(aes(y = ..count..), fill="blue", alpha = .3, binwidth = 500) +
+    scale_x_continuous(name = "Total number of Steps per day",
+                       breaks= seq(0,24000,1000)) +
+    scale_y_continuous(name = "Count") +
+    labs(title="Histogram for Total Number of Steps per Day with Replaced Missing Value")
+```
+These values differ from the estimates from the first part of the assignment. The following table summarizes the difference. 
+
+|            |with missing value    |imput missing value|
+|------------|----------------------|-------------------|
+|Sum of steps|`r sum(subNomissing$steps)`|`r sum(completelyData$steps)`|
+|Mean of steps|`r as.integer(round(mean(sumNoMissing$steps),0))`|`r as.integer(round(mean(sumImput$steps),2))`|
+|Median of steps|`r median(sumNoMissing$steps)`|`r median(sumImput$steps)`|
+
+Apart from 'sum of steps' is increased, mean and median are not impacted very much.
+
+### Are there differences in activity patterns between weekdays and weekends?  
+To achieve this, firstly create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
+```{r}
+weekdayOrWeekend <- factor(weekdays(completelyData$date) %in% c("Saturday","Sunday"), labels=c("weekday","weekend"), ordered=FALSE)
+```
+
+Secondly, make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). 
+
+```{r, fig.width=10}
+averageImput <- aggregate(completelyData$steps, by=list(completelyData$interval, weekdayOrWeekend), mean)
+names(averageImput) <- c("interval", "weekdayOrWeekend", "stepsMean")
+ggplot(data=averageImput, aes(averageImput$stepsMean)) +
+    geom_line(aes(x=averageImput$interval, y = averageImput$stepsMean), col="blue") +               
+    facet_grid(weekdayOrWeekend ~ .) +  
+    scale_x_continuous(name = "minutes in one day",
+                        breaks= seq(0,2400,120)) +
+    scale_y_continuous(name = "Average steps") +
+    labs(title="Average steps during one day over Oct and Nov After Imputting Missing Values")
+```
+The maximun steps activity occured in weekday category, on the other hand the majority steps were done in weekend.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
