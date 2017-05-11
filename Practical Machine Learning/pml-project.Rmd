@@ -1,0 +1,172 @@
+---
+title: "Prediction Assignment"
+author: "liuyi647"
+date: "8 May 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(message=FALSE)
+```
+
+## Abstract
+One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this assignment, the goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants, and to predict the manner in which they did the exercise. The predicted variable is the "classe" variable in the training set. 
+
+**More Information**
+http://groupware.les.inf.puc-rio.br/har
+
+**Training Data**
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
+
+**Test Data**
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
+
+## Data Exploratory and Data Process
+First of all, the below R code is to downloand the training data and the testing data.
+```{r}
+trainUrl = "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+trainFilename = "training.csv"
+
+if(!file.exists(trainFilename)) {
+    download.file(trainUrl, destfile=trainFilename)
+}
+
+trainRawData <- read.csv(trainFilename)
+
+testUrl = "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+testFilename = "testing.csv"
+if(!file.exists(testFilename)) {
+    download.file(testUrl, destfile=testFilename)
+}
+
+testRawData <- read.csv(testFilename)
+```
+The size of two data sets is as below. 
+```{r}
+dim(trainRawData)
+dim(testRawData)
+```
+
+*classe* variable is a factor predicted variable. The following shows information about the predicted variable.
+```{r}
+class(trainRawData$classe)
+table(trainRawData$classe)
+```
+
+The data clean process includes
+
+* Delete those columns which contain missing values.
+
+* Delete those columns which are about time or time window.
+
+* Delete those columns which have near zero variance. Near zero variance variables is not only non-informative, it also can break some models. 
+
+```{r}
+library(dplyr)
+library(caret)
+
+trainCleanData <- select(trainRawData, -contains("X"), -contains("timestamp"),-contains("window"), -contains("user"))
+trainCleanData <- trainCleanData[, colSums(is.na(trainCleanData)) == 0]
+
+nzvColumns <- nearZeroVar(trainCleanData, saveMetrics = TRUE)
+trainCleanData <- trainCleanData[, nzvColumns$nzv==FALSE]
+```
+
+The processed training data size is as below.
+```{r}
+dim(trainCleanData)
+```
+
+There are 41 predictors. Let's see the correlation among the numberic predictors.
+
+```{r, fig.width = 10, fig.height = 10}
+library(corrplot)
+corr <- round(cor(trainCleanData[sapply(trainCleanData, is.numeric)]), 2)
+
+par(ps=6)
+corrplot.mixed(corr, order = "hclust", tl.col="black", diag = "n", tl.pos = "lt",
+               lower = "circle", upper = "number", tl.cex = 1.5, mar=c(1,0,1,0))
+```
+
+## Plan
+The above exploratory exercise gives us the following information:
+
+* the predicted variable is a factor variable.
+
+* there are 41 predictors. There are high correlation among some of them. 
+
+* the size the training data is 19622 x 41. It allows us to have validation data sets.
+
+Therefore, the predict model shall be a classification predict model, such as *rpart* or *random forest*. PCA is a good way to compress the data size as there are 41 predictors with high correlation. 
+
+The plan is 
+
+* split the training data set into one training set and one validating set
+
+* train a rpart model
+
+* train a random forest model
+
+* compare them and select the best one. 
+
+
+## Data Splitting
+The training data are splited into 60% training data and 40% validation data.
+```{r}
+set.seed(1254)
+
+forTraining <- createDataPartition(trainCleanData$classe, p=0.60, list=FALSE)
+trainingData <- trainCleanData[forTraining,]
+validatingData <- trainCleanData[-forTraining,]
+```
+
+## Model Selection and Valiation
+There are two algorithms which will be selected and tested in this assignment. One is rpart, another one is random forest. We will train two models using each algorithm. One model uses PCA preprocess, and another one doesn't use PCA preprocess. The final model will be the best one in these four models. 
+
+### Rpart Model
+Now train the rpart model with the PCA reprocessed data. For a higher process speed, the trainControl is configured as parallel.
+
+The K-fold cross validation is applied as well. The fold number is 5.
+```{r}
+library(doParallel)
+library(rpart)
+
+cluster <- makeCluster(detectCores() - 1) 
+registerDoParallel(cluster)
+
+train_control <- trainControl(method="cv", number=5, allowParallel = TRUE)
+
+model_rpart_pca <- train(classe~.,trControl = train_control, preProcess=c("pca"), data=trainingData, method="rpart")
+pred_rpart_pca <- predict(model_rpart_pca, validatingData)
+(cm_rpart_pca <- confusionMatrix(pred_rpart_pca, validatingData$classe))
+```
+Surprisely, The overall accuracy is `r cm_rpart_pca$overall['Accuracy']`, which is very low. Now let's test rpart model with full data.
+
+```{r}
+model_rpart <- train(classe~.,trControl = train_control, data=trainingData, method="rpart")
+pred_rpart <- predict(model_rpart, validatingData)
+(cm_rpart <- confusionMatrix(pred_rpart, validatingData$classe))
+```
+The overall accuracy is `r cm_rpart$overall['Accuracy']`, which is lower than 0.5. The next one is the random forest with PCA compressed data.
+```{r} 
+model_rf_pca<- train(classe~., trControl = train_control, preProcess=c("pca"), data=trainingData, method="rf")
+pred_rf_pca <- predict(model_rf_pca, validatingData)
+(cm_rf_pca <- confusionMatrix(pred_rf_pca, validatingData$classe))
+```
+The overall accuracy is `r cm_rf_pca$overall['Accuracy']`, which is very good result. The final model is the random forest with full data.
+
+```{r}
+model_rf<- train(classe~., trControl = train_control, data=trainingData, method="rf")
+pred_rf <- predict(model_rf, validatingData)
+(cm_rf <- confusionMatrix(pred_rf, validatingData$classe))
+```
+The overall accuracy is `r cm_rf$overall['Accuracy']`, which is the best one. The out of sample error is 1 - 0.991 = 0.009 = 0.9%. 
+
+## Prediction on Testing Data
+The selected model is *model_rf*. The prediction result is 
+
+```{r}
+pred_final <- predict(model_rf, testRawData)
+pred_final
+```
