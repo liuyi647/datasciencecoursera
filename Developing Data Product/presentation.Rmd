@@ -1,0 +1,65 @@
+---
+title: "Developing Data Products Course Project"
+author: "liuyi647"
+date: "22 May 2017"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(message=FALSE)
+```
+
+## Background Knowledge
+New Zealanders live on the edge. Depending on their location, it might be the edge of the Australian Plate or it might be the edge of the Pacific Plate. The active Pacific-Australian Plate boundary passes through New Zealand producing earthquakes, volcanoes, steep terrain and active deformation. In places the active boundary between the interacting plates is quite narrow, for example the Alpine Fault and Southern Alps in the central South Island. In other regions, such as most of the central and eastern North Island, it is a broad zone of deformation. [Ref](http://info.geonet.org.nz/display/geonet/About+GeoNet)
+
+## Earthquakes Between 22 Apr 2017 and 22 May 2017 in New Zealand
+
+In this course project, a shiny application is created for exploring New Zealand earthquake data (22/04/2017 - 22/05/2017). Meanwhile,
+
+a presentation also is a part of Developing Data Product course project. The presentation is the abstract of the shiny application.
+
+## Application
+
+The application allows users to explore earthquake data of 22/04/2017 - 22/05/2017 in New Zealand. User can
+
+- filter data by earthquake magnitude and depth
+- configure number of entries and page of the table
+
+The application is available here
+The source code is here
+
+## Raw Data
+The raw data is provided by [GeoNet NZ](http://www.geonet.org.nz/). GeoNet is the result of a partnership between the Earthquake Commission (EQC), GNS Science, and Land Information New Zealand (LINZ). The raw data is available [here](http://quakesearch.geonet.org.nz/)
+
+## Data Process - source code
+
+```{r echo = TRUE, eval=FALSE}
+library(data.table)
+rawDt <- fread('data/earthquakes.csv')
+dt <- subset(rawDt, 
+     select=c("datetime","longitude","latitude","magnitude","depth"))
+dt$depthLevel <- ifelse(dt$depth <= 15, "very shallow",
+     ifelse(dt$depth > 15 & dt$depth <= 50, "mid shallow",
+     ifelse(dt$depth > 50 & dt$depth <= 70, "deep shallow",
+     ifelse(dt$depth > 70 & dt$depth <= 300, "intermediate-depth",
+     ifelse(dt$depth > 300, "deep-depth", NA)))))
+head(dt)
+```
+
+## Data Process - results
+
+```{r echo = FALSE}
+library(data.table)
+rawDt <- fread('data/earthquakes.csv')
+dt <- subset(rawDt, 
+     select=c("datetime","longitude","latitude","magnitude","depth"))
+dt$depthLevel <- ifelse(dt$depth <= 15, "very shallow",
+     ifelse(dt$depth > 15 & dt$depth <= 50, "mid shallow",
+     ifelse(dt$depth > 50 & dt$depth <= 70, "deep shallow",
+     ifelse(dt$depth > 70 & dt$depth <= 300, "intermediate-depth",
+     ifelse(dt$depth > 300, "deep-depth", NA)))))
+head(dt)
+```
+
+
