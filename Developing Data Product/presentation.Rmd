@@ -15,9 +15,9 @@ New Zealanders live on the edge. Depending on their location, it might be the ed
 
 ## Earthquakes Between 22 Apr 2017 and 22 May 2017 in New Zealand
 
-In this course project, a shiny application is created for exploring New Zealand earthquake data (22/04/2017 - 22/05/2017). Meanwhile,
+In this course project, a shiny application is created for exploring New Zealand earthquake data (22/04/2017 - 22/05/2017). 
 
-a presentation also is a part of Developing Data Product course project. The presentation is the abstract of the shiny application.
+Meanwhile, a presentation also is a part of Developing Data Product course project. The presentation is the abstract of the shiny application.
 
 ## Application
 
@@ -26,8 +26,9 @@ The application allows users to explore earthquake data of 22/04/2017 - 22/05/20
 - filter data by earthquake magnitude and depth
 - configure number of entries and page of the table
 
-The application is available here
-The source code is here
+The application is available [here](https://liuyi647.shinyapps.io/CourseProject/).
+
+The source code is [here](https://github.com/liuyi647/datasciencecoursera/tree/master/Developing%20Data%20Product)
 
 ## Raw Data
 The raw data is provided by [GeoNet NZ](http://www.geonet.org.nz/). GeoNet is the result of a partnership between the Earthquake Commission (EQC), GNS Science, and Land Information New Zealand (LINZ). The raw data is available [here](http://quakesearch.geonet.org.nz/)
